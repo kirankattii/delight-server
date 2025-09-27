@@ -1,0 +1,18 @@
+{
+  "collectionName": "components_block_project_highlights",
+  "info": {
+    "displayName": "Project Highlights"
+  },
+  "options": {},
+  "attributes": {
+    "activities": {
+      "type": "component",
+      "component": "shared.facilities-and-activities",
+      "repeatable": true
+    },
+    "projectHighlights": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}

@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_block_rich_content_blocks",
+  "info": {
+    "displayName": "Rich Content Blocks"
+  },
+  "options": {},
+  "attributes": {
+    "TextBlock": {
+      "type": "blocks"
+    },
+    "ImageBlock": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    }
+  },
+  "config": {}
+}

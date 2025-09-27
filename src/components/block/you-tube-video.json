@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_block_you_tube_videos",
+  "info": {
+    "displayName": "YouTube Video"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "youtubeLink": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}

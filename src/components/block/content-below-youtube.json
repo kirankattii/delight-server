@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_block_content_below_youtubes",
+  "info": {
+    "displayName": "contentBelowYoutube"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "activities": {
+      "type": "component",
+      "component": "shared.facilities-and-activities",
+      "repeatable": true
+    }
+  },
+  "config": {}
+}

@@ -1,0 +1,29 @@
+{
+  "collectionName": "components_block_canvas_below_youtubes",
+  "info": {
+    "displayName": "canvasBelowYoutube"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "visitUs": {
+      "type": "string"
+    },
+    "visitSteps": {
+      "type": "component",
+      "component": "shared.steps",
+      "repeatable": true
+    },
+    "projectHighlights": {
+      "type": "component",
+      "component": "block.project-highlights",
+      "repeatable": false
+    }
+  },
+  "config": {}
+}

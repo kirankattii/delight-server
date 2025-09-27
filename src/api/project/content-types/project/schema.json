@@ -1,0 +1,100 @@
+{
+  "kind": "collectionType",
+  "collectionName": "projects",
+  "info": {
+    "singularName": "project",
+    "pluralName": "projects",
+    "displayName": "Project"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "projectContent": {
+      "type": "blocks"
+    },
+    "desktopCoverImg": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "tabCoverImg": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "mobileCoverImg": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "imgSlider": {
+      "type": "component",
+      "component": "block.image-slider",
+      "repeatable": false
+    },
+    "seo": {
+      "type": "component",
+      "component": "block.seo",
+      "repeatable": false
+    },
+    "youtubVideos": {
+      "type": "component",
+      "component": "block.you-tube-video",
+      "repeatable": false
+    },
+    "masterPlan": {
+      "type": "component",
+      "component": "block.master-plan",
+      "repeatable": false
+    },
+    "projectSteps": {
+      "type": "component",
+      "component": "block.project-steps",
+      "repeatable": true
+    },
+    "activities": {
+      "type": "component",
+      "component": "shared.facilities-and-activities",
+      "repeatable": true
+    },
+    "projectHighlights": {
+      "type": "component",
+      "component": "block.project-highlights",
+      "repeatable": false
+    },
+    "canvasStyle": {
+      "type": "component",
+      "component": "block.canvas-below-youtube",
+      "repeatable": false
+    },
+    "bellevueeStyle": {
+      "type": "component",
+      "component": "block.bellevuee-style",
+      "repeatable": false
+    }
+  }
+}

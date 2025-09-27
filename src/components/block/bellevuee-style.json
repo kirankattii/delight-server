@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_block_bellevuee_styles",
+  "info": {
+    "displayName": "bellevueeStyle"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "activities": {
+      "type": "component",
+      "component": "shared.facilities-and-activities",
+      "repeatable": true
+    }
+  },
+  "config": {}
+}

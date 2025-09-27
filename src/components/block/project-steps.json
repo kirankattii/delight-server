@@ -1,0 +1,26 @@
+{
+  "collectionName": "components_block_project_steps",
+  "info": {
+    "displayName": "project-steps"
+  },
+  "options": {},
+  "attributes": {
+    "title1": {
+      "type": "string"
+    },
+    "title2": {
+      "type": "string"
+    },
+    "activities": {
+      "type": "component",
+      "component": "shared.facilities-and-activities",
+      "repeatable": true
+    },
+    "projectSteps": {
+      "type": "component",
+      "component": "shared.steps",
+      "repeatable": true
+    }
+  },
+  "config": {}
+}
