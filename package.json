@@ -17,6 +17,7 @@
     "vercel-dev": "strapi develop"
   },
   "dependencies": {
+    "@strapi-community/cloudinary-media-library": "^1.0.3",
     "@strapi/plugin-cloud": "5.23.5",
     "@strapi/plugin-users-permissions": "5.23.5",
     "@strapi/strapi": "5.23.5",
