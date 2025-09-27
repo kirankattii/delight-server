@@ -1,8 +1,7 @@
 const path = require('path');
 
 module.exports = ({ env }) => {
-  // Use postgres by default on Render, sqlite for local development
-  const client = env('DATABASE_CLIENT', env('RENDER') ? 'postgres' : 'sqlite');
+  const client = env('DATABASE_CLIENT', 'postgres');
 
   const connections = {
     mysql: {
@@ -35,9 +34,9 @@ module.exports = ({ env }) => {
           user: env('DATABASE_USERNAME', 'strapi'),
           password: env('DATABASE_PASSWORD', 'strapi'),
         }),
-        // SSL configuration - required for Render
-        ssl: env.bool('DATABASE_SSL', env('RENDER') ? true : false) && {
-          rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', env('RENDER') ? false : true),
+        // SSL configuration for Render
+        ssl: env.bool('DATABASE_SSL', true) && {
+          rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', false),
         },
         schema: env('DATABASE_SCHEMA', 'public'),
       },

@@ -14,7 +14,9 @@
     "upgrade": "npx @strapi/upgrade latest",
     "upgrade:dry": "npx @strapi/upgrade latest --dry",
     "vercel-build": "strapi build",
-    "vercel-dev": "strapi develop"
+    "vercel-dev": "strapi develop",
+    "render-postbuild": "npm run build",
+    "render-start": "npm run start"
   },
   "dependencies": {
     "@strapi-community/cloudinary-media-library": "^1.0.3",
