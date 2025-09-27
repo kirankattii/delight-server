@@ -6,7 +6,7 @@ const startStrapi = async () => {
   if (!strapi) {
     try {
       strapi = await createStrapi({
-        distDir: './dist',
+        distDir: './build',
         appDir: './src',
       });
       await strapi.start();

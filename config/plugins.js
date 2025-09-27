@@ -1,4 +1,4 @@
-export default {
+module.exports = {
     'cloudinary-media-library': {
       enabled: true,
       config: {
