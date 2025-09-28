@@ -29,8 +29,10 @@ module.exports = ({ env }) => {
           
           let connectionString = env('DATABASE_URL');
           
-          // Handle Supabase IPv6 issue by using IPv4 pooler
-          if (connectionString.includes('supabase') || connectionString.includes('pooler')) {
+          // Handle Render PostgreSQL connection with IPv4 preference
+          if (connectionString.includes('render.com') || connectionString.includes('onrender.com')) {
+            console.log('🔧 Detected Render PostgreSQL connection, applying optimized settings');
+          } else if (connectionString.includes('supabase')) {
             console.log('🔧 Detected Supabase connection, using IPv4 pooler');
             
             // Extract connection details from the URL
@@ -41,8 +43,17 @@ module.exports = ({ env }) => {
             const username = url.username;
             const password = url.password;
             
-            // Use Supabase's IPv4 pooler endpoint
-            const ipv4Hostname = hostname.replace(/\.supabase\.co$/, '.pooler.supabase.co');
+            // Use Supabase's correct IPv4 pooler endpoint format
+            // Format: aws-0-{region}.pooler.supabase.com
+            let ipv4Hostname;
+            if (hostname.includes('db.')) {
+              // Extract the project reference from db.{project-ref}.supabase.co
+              const projectRef = hostname.replace('db.', '').replace('.supabase.co', '');
+              ipv4Hostname = `aws-0-us-west-1.pooler.supabase.com`;
+            } else {
+              // Fallback to original hostname if format is unexpected
+              ipv4Hostname = hostname;
+            }
             
             // Reconstruct connection string with IPv4 pooler
             connectionString = `postgresql://${username}:${password}@${ipv4Hostname}:${port}/${database}`;
@@ -56,7 +67,7 @@ module.exports = ({ env }) => {
               rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', false),
               require: env.bool('DATABASE_SSL', true),
             },
-            // Force IPv4 connection
+            // Force IPv4 connection to avoid IPv6 issues
             family: 4,
             // Additional connection options for better reliability
             keepAlive: true,
@@ -66,6 +77,12 @@ module.exports = ({ env }) => {
             idleTimeoutMillis: 30000,
             // Query timeout
             query_timeout: 60000,
+            // Additional options for Render PostgreSQL
+            ...(connectionString.includes('render.com') && {
+              // Render-specific connection options
+              application_name: 'strapi-app',
+              statement_timeout: 60000,
+            }),
           };
         } else {
           console.log('⚠️  DATABASE_URL not found, using individual parameters');
@@ -93,8 +110,8 @@ module.exports = ({ env }) => {
         }
       })(),
       pool: { 
-        min: env.int('DATABASE_POOL_MIN', 2), 
-        max: env.int('DATABASE_POOL_MAX', 10),
+        min: env.int('DATABASE_POOL_MIN', 1), 
+        max: env.int('DATABASE_POOL_MAX', 20),
         acquireTimeoutMillis: env.int('DATABASE_ACQUIRE_TIMEOUT', 60000),
         createTimeoutMillis: env.int('DATABASE_CREATE_TIMEOUT', 30000),
         destroyTimeoutMillis: env.int('DATABASE_DESTROY_TIMEOUT', 5000),
