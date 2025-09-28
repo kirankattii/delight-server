@@ -23,14 +23,26 @@ module.exports = ({ env }) => {
       pool: { min: env.int('DATABASE_POOL_MIN', 2), max: env.int('DATABASE_POOL_MAX', 10) },
     },
     postgres: {
-      connection: env('DATABASE_URL') ? {
-        connectionString: env('DATABASE_URL'),
-        ssl: {
-          rejectUnauthorized: false,
-          require: true,
-        },
-        family: 4,
-      } : {
+      connection: env('DATABASE_URL') ? (() => {
+        let connectionString = env('DATABASE_URL');
+        
+        // Handle Supabase IPv6 issues by using IPv4 pooler
+        if (connectionString.includes('supabase.co') && !connectionString.includes('pooler')) {
+          console.log('🔧 Detected Supabase connection, converting to IPv4 pooler');
+          // Convert from: db.[project-ref].supabase.co to [project-ref].pooler.supabase.co
+          connectionString = connectionString.replace(/db\.([^.]+)\.supabase\.co/, '$1.pooler.supabase.co');
+          console.log(`🔄 Converted to IPv4 pooler: ${connectionString}`);
+        }
+        
+        return {
+          connectionString,
+          ssl: {
+            rejectUnauthorized: false,
+            require: true,
+          },
+          family: 4, // Force IPv4
+        };
+      })() : {
         host: env('DATABASE_HOST', 'localhost'),
         port: env.int('DATABASE_PORT', 5432),
         database: env('DATABASE_NAME', 'strapi'),

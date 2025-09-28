@@ -20,6 +20,9 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('supabase')) {
   
   // Set additional environment variables for better connection handling
   process.env.NODE_OPTIONS = (process.env.NODE_OPTIONS || '') + ' --dns-result-order=ipv4first';
+  
+  // Log the current DATABASE_URL for debugging
+  console.log(`📊 Current DATABASE_URL: ${process.env.DATABASE_URL.replace(/:[^:@]+@/, ':***@')}`);
 }
 
 console.log('🔧 Starting Strapi...');
