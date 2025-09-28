@@ -10,6 +10,7 @@ module.exports = ({ env }) => {
   
   if (env('DATABASE_URL')) {
     console.log(`   DATABASE_URL: ${env('DATABASE_URL').substring(0, 30)}...`);
+    console.log(`   Using connectionString: true`);
   }
 
   const connections = {
@@ -36,9 +37,10 @@ module.exports = ({ env }) => {
         if (env('DATABASE_URL')) {
           console.log('   ✅ Using DATABASE_URL connection string');
           
-          // For Supabase, parse the URL and use individual parameters to avoid IPv6 issues
-          if (env('DATABASE_URL').includes('supabase.co')) {
-            console.log('   🔧 Detected Supabase connection, parsing URL for IPv4 compatibility');
+          // For Supabase, parse the connection string and use individual parameters
+          // This avoids IPv6 resolution issues
+          if (env('DATABASE_URL') && env('DATABASE_URL').includes('supabase.co')) {
+            console.log('   🔧 Detected Supabase connection, using individual parameters to avoid IPv6');
             
             try {
               const url = new URL(env('DATABASE_URL'));
@@ -48,8 +50,9 @@ module.exports = ({ env }) => {
               const username = url.username;
               const password = url.password;
               
-              console.log(`   🔄 Using individual parameters: ${hostname}:${port}/${database}`);
+              console.log(`   🔄 Parsed connection: ${hostname}:${port}/${database}`);
               
+              // Return individual connection parameters instead of connection string
               return {
                 host: hostname,
                 port: parseInt(port),
@@ -63,30 +66,38 @@ module.exports = ({ env }) => {
                 },
                 // Force IPv4 connection
                 family: 4,
-                // Connection options
+                // Additional connection options for better reliability
                 keepAlive: true,
                 keepAliveInitialDelayMillis: 0,
+                // Connection timeout settings
                 connectionTimeoutMillis: 30000,
                 idleTimeoutMillis: 30000,
+                // Query timeout
                 query_timeout: 60000,
               };
             } catch (error) {
-              console.log('   ⚠️  Could not parse Supabase URL, using connection string');
+              console.log('   ⚠️  Could not parse Supabase URL, falling back to connection string');
             }
           }
           
-          // For non-Supabase databases, use connection string
+          // Use original connection string for non-Supabase databases
+          let connectionString = env('DATABASE_URL');
+          
           return {
-            connectionString: env('DATABASE_URL'),
+            connectionString: connectionString,
             ssl: {
               rejectUnauthorized: false,
               require: true,
             },
+            // Force IPv4 connection
             family: 4,
+            // Additional connection options for better reliability
             keepAlive: true,
             keepAliveInitialDelayMillis: 0,
+            // Connection timeout settings
             connectionTimeoutMillis: 30000,
             idleTimeoutMillis: 30000,
+            // Query timeout
             query_timeout: 60000,
           };
         } else {
@@ -98,9 +109,11 @@ module.exports = ({ env }) => {
             user: env('DATABASE_USERNAME', 'strapi'),
             password: env('DATABASE_PASSWORD', 'strapi'),
             schema: env('DATABASE_SCHEMA', 'public'),
+            // Force IPv4 connection
             family: 4,
           };
           
+          // Add SSL for production
           if (env('RENDER') || env.bool('DATABASE_SSL', false)) {
             config.ssl = {
               rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', false),
