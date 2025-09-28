@@ -16,7 +16,8 @@
     "vercel-build": "strapi build",
     "vercel-dev": "strapi develop",
     "render-postbuild": "npm run build",
-    "render-start": "node start.js"
+    "render-start": "node start.js",
+    "railway-start": "node start.js"
   },
   "dependencies": {
     "@strapi-community/cloudinary-media-library": "^1.0.3",
