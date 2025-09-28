@@ -2,15 +2,6 @@ const path = require('path');
 
 module.exports = ({ env }) => {
   const client = env('DATABASE_CLIENT', 'postgres');
-  
-  console.log(`🔧 Database configuration:`);
-  console.log(`   Client: ${client}`);
-  console.log(`   RENDER env: ${env('RENDER')}`);
-  console.log(`   DATABASE_URL exists: ${!!env('DATABASE_URL')}`);
-  
-  if (env('DATABASE_URL')) {
-    console.log(`   DATABASE_URL: ${env('DATABASE_URL').substring(0, 30)}...`);
-  }
 
   const connections = {
     mysql: {
@@ -32,35 +23,23 @@ module.exports = ({ env }) => {
       pool: { min: env.int('DATABASE_POOL_MIN', 2), max: env.int('DATABASE_POOL_MAX', 10) },
     },
     postgres: {
-      connection: (() => {
-        if (env('DATABASE_URL')) {
-          console.log('   ✅ Using DATABASE_URL connection string');
-    
-          const isSupabase = env('DATABASE_URL').includes('supabase.co');
-    
-          if (isSupabase) {
-            console.log('   🔧 Detected Supabase connection, using connection string with IPv4');
-    
-            return {
-              connectionString: env('DATABASE_URL'),
-              ssl: {
-                rejectUnauthorized: false,
-                require: true,
-              },
-              family: 4, // ✅ force IPv4
-            };
-          }
-    
-          return {
-            connectionString: env('DATABASE_URL'),
-            ssl: {
-              rejectUnauthorized: false,
-              require: true,
-            },
-            family: 4,
-          };
-        }
-      })(),
+      connection: env('DATABASE_URL') ? {
+        connectionString: env('DATABASE_URL'),
+        ssl: {
+          rejectUnauthorized: false,
+          require: true,
+        },
+        family: 4,
+      } : {
+        host: env('DATABASE_HOST', 'localhost'),
+        port: env.int('DATABASE_PORT', 5432),
+        database: env('DATABASE_NAME', 'strapi'),
+        user: env('DATABASE_USERNAME', 'strapi'),
+        password: env('DATABASE_PASSWORD', 'strapi'),
+        ssl: env.bool('DATABASE_SSL', false) && {
+          rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', true),
+        },
+      },
       pool: { min: 2, max: 10 },
     },
     sqlite: {
