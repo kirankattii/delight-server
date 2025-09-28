@@ -39,17 +39,10 @@ module.exports = ({ env }) => {
           const isSupabase = env('DATABASE_URL').includes('supabase.co');
     
           if (isSupabase) {
-            console.log('   🔧 Detected Supabase connection, forcing IPv4 + SSL');
-    
-            const url = new URL(env('DATABASE_URL'));
+            console.log('   🔧 Detected Supabase connection, using connection string with IPv4');
     
             return {
-              host: url.hostname,
-              port: parseInt(url.port || '5432'),
-              database: url.pathname.substring(1),
-              user: url.username,
-              password: url.password,
-              schema: env('DATABASE_SCHEMA', 'public'),
+              connectionString: env('DATABASE_URL'),
               ssl: {
                 rejectUnauthorized: false,
                 require: true,
