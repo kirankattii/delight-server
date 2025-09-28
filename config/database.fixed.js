@@ -37,11 +37,15 @@ module.exports = ({ env }) => {
         if (env('DATABASE_URL')) {
           console.log('   ✅ Using DATABASE_URL connection string');
           
-          // For Supabase, use original connection string but force IPv4
           let connectionString = env('DATABASE_URL');
           
-          if (connectionString.includes('supabase.co')) {
-            console.log('   🔧 Detected Supabase connection, forcing IPv4 without pooler');
+          // Handle Supabase IPv6 issue by using IPv4 pooler
+          if (connectionString.includes('supabase.co') && !connectionString.includes('pooler')) {
+            console.log('   🔧 Detected Supabase connection, converting to IPv4 pooler');
+            
+            // Simple string replacement to convert to pooler
+            connectionString = connectionString.replace('.supabase.co', '.pooler.supabase.co');
+            console.log(`   🔄 Converted to IPv4 pooler`);
           }
           
           return {
@@ -58,8 +62,6 @@ module.exports = ({ env }) => {
             // Connection timeout settings
             connectionTimeoutMillis: 30000,
             idleTimeoutMillis: 30000,
-            // Query timeout
-            query_timeout: 60000,
           };
         } else {
           console.log('   ⚠️  DATABASE_URL not found, using individual parameters');

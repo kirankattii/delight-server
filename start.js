@@ -22,10 +22,6 @@ if (!process.env.RENDER) {
 if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('supabase')) {
   console.log('🔧 Detected Supabase database, applying IPv4 fixes...');
   
-  // Force IPv4 for Node.js DNS resolution
-  const dns = require('dns');
-  dns.setDefaultResultOrder('ipv4first');
-  
   // Set additional environment variables for better connection handling
   process.env.NODE_OPTIONS = (process.env.NODE_OPTIONS || '') + ' --dns-result-order=ipv4first';
 }
