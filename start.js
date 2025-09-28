@@ -21,8 +21,20 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('supabase')) {
   // Set additional environment variables for better connection handling
   process.env.NODE_OPTIONS = (process.env.NODE_OPTIONS || '') + ' --dns-result-order=ipv4first';
   
+  // Force IPv4 DNS resolution
+  process.env.NODE_OPTIONS = (process.env.NODE_OPTIONS || '') + ' --dns-result-order=ipv4first';
+  
   // Log the current DATABASE_URL for debugging
   console.log(`📊 Current DATABASE_URL: ${process.env.DATABASE_URL.replace(/:[^:@]+@/, ':***@')}`);
+  
+  // Check if we need to convert to pooler
+  if (process.env.DATABASE_URL.includes('.supabase.co') && !process.env.DATABASE_URL.includes('pooler')) {
+    console.log('🔄 Converting Supabase URL to use IPv4 pooler...');
+    const url = new URL(process.env.DATABASE_URL);
+    const ipv4Hostname = url.hostname.replace(/\.supabase\.co$/, '.pooler.supabase.co');
+    process.env.DATABASE_URL = process.env.DATABASE_URL.replace(url.hostname, ipv4Hostname);
+    console.log(`✅ Updated DATABASE_URL to use pooler: ${ipv4Hostname}`);
+  }
 }
 
 console.log('🔧 Starting Strapi...');
