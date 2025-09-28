@@ -1,22 +1,16 @@
 const path = require('path');
 
 module.exports = ({ env }) => {
-  // Use postgres by default on Render, sqlite for local development
-  const client = env('DATABASE_CLIENT', env('RENDER') ? 'postgres' : 'sqlite');
+  const client = env('DATABASE_CLIENT', 'postgres');
   
-  // Debug logging
   console.log(`🔧 Database configuration:`);
   console.log(`   Client: ${client}`);
   console.log(`   RENDER env: ${env('RENDER')}`);
   console.log(`   DATABASE_URL exists: ${!!env('DATABASE_URL')}`);
+  
   if (env('DATABASE_URL')) {
     console.log(`   DATABASE_URL: ${env('DATABASE_URL').substring(0, 30)}...`);
     console.log(`   Using connectionString: true`);
-  } else {
-    console.log(`   Using individual connection parameters`);
-    console.log(`   DATABASE_HOST: ${env('DATABASE_HOST', 'localhost')}`);
-    console.log(`   DATABASE_PORT: ${env.int('DATABASE_PORT', 5432)}`);
-    console.log(`   DATABASE_NAME: ${env('DATABASE_NAME', 'strapi')}`);
   }
 
   const connections = {
@@ -43,14 +37,27 @@ module.exports = ({ env }) => {
         if (env('DATABASE_URL')) {
           console.log('   ✅ Using DATABASE_URL connection string');
           
-          // Parse the DATABASE_URL to force IPv4 connection for Supabase
           let connectionString = env('DATABASE_URL');
           
-          // Check if this is a Supabase connection and force IPv4
+          // Handle Supabase IPv6 issue by using IPv4 pooler
           if (connectionString.includes('supabase') || connectionString.includes('pooler')) {
-            console.log('   🔧 Detected Supabase connection, forcing IPv4');
-            // Replace IPv6 hostname with IPv4 equivalent or use connection pooling
-            connectionString = connectionString.replace(/@[^:]+:/, '@db.'); // Use Supabase's IPv4 pooler
+            console.log('   🔧 Detected Supabase connection, using IPv4 pooler');
+            
+            // Extract connection details from the URL
+            const url = new URL(connectionString);
+            const hostname = url.hostname;
+            const port = url.port || '5432';
+            const database = url.pathname.substring(1);
+            const username = url.username;
+            const password = url.password;
+            
+            // Use Supabase's IPv4 pooler endpoint
+            const ipv4Hostname = hostname.replace(/\.supabase\.co$/, '.pooler.supabase.co');
+            
+            // Reconstruct connection string with IPv4 pooler
+            connectionString = `postgresql://${username}:${password}@${ipv4Hostname}:${port}/${database}`;
+            
+            console.log(`   🔄 Converted to IPv4 pooler: ${ipv4Hostname}`);
           }
           
           return {
@@ -61,9 +68,14 @@ module.exports = ({ env }) => {
             },
             // Force IPv4 connection
             family: 4,
-            // Additional connection options for Supabase
+            // Additional connection options for better reliability
             keepAlive: true,
             keepAliveInitialDelayMillis: 0,
+            // Connection timeout settings
+            connectionTimeoutMillis: 30000,
+            idleTimeoutMillis: 30000,
+            // Query timeout
+            query_timeout: 60000,
           };
         } else {
           console.log('   ⚠️  DATABASE_URL not found, using individual parameters');
@@ -78,7 +90,7 @@ module.exports = ({ env }) => {
             family: 4,
           };
           
-          // Add SSL for Render
+          // Add SSL for production
           if (env('RENDER') || env.bool('DATABASE_SSL', false)) {
             config.ssl = {
               rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', false),
