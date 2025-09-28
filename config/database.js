@@ -10,7 +10,13 @@ module.exports = ({ env }) => {
   console.log(`   RENDER env: ${env('RENDER')}`);
   console.log(`   DATABASE_URL exists: ${!!env('DATABASE_URL')}`);
   if (env('DATABASE_URL')) {
-    console.log(`   DATABASE_URL: ${env('DATABASE_URL').substring(0, 20)}...`);
+    console.log(`   DATABASE_URL: ${env('DATABASE_URL').substring(0, 30)}...`);
+    console.log(`   Using connectionString: true`);
+  } else {
+    console.log(`   Using individual connection parameters`);
+    console.log(`   DATABASE_HOST: ${env('DATABASE_HOST', 'localhost')}`);
+    console.log(`   DATABASE_PORT: ${env.int('DATABASE_PORT', 5432)}`);
+    console.log(`   DATABASE_NAME: ${env('DATABASE_NAME', 'strapi')}`);
   }
 
   const connections = {
@@ -33,31 +39,39 @@ module.exports = ({ env }) => {
       pool: { min: env.int('DATABASE_POOL_MIN', 2), max: env.int('DATABASE_POOL_MAX', 10) },
     },
     postgres: {
-      connection: {
-        // Use connectionString if available (Render provides this)
-        ...(env('DATABASE_URL') && { 
-          connectionString: env('DATABASE_URL'),
-          // Parse the connection string for additional options
-          ssl: {
-            rejectUnauthorized: false,
-            require: true,
+      connection: (() => {
+        if (env('DATABASE_URL')) {
+          console.log('   ✅ Using DATABASE_URL connection string');
+          return {
+            connectionString: env('DATABASE_URL'),
+            ssl: {
+              rejectUnauthorized: false,
+              require: true,
+            }
+          };
+        } else {
+          console.log('   ⚠️  DATABASE_URL not found, using individual parameters');
+          const config = {
+            host: env('DATABASE_HOST', 'localhost'),
+            port: env.int('DATABASE_PORT', 5432),
+            database: env('DATABASE_NAME', 'strapi'),
+            user: env('DATABASE_USERNAME', 'strapi'),
+            password: env('DATABASE_PASSWORD', 'strapi'),
+            schema: env('DATABASE_SCHEMA', 'public'),
+          };
+          
+          // Add SSL for Render
+          if (env('RENDER') || env.bool('DATABASE_SSL', false)) {
+            config.ssl = {
+              rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', false),
+              require: true,
+            };
+            console.log('   🔒 SSL enabled for database connection');
           }
-        }),
-        // Fallback to individual connection parameters
-        ...(env('DATABASE_URL') ? {} : {
-          host: env('DATABASE_HOST', 'localhost'),
-          port: env.int('DATABASE_PORT', 5432),
-          database: env('DATABASE_NAME', 'strapi'),
-          user: env('DATABASE_USERNAME', 'strapi'),
-          password: env('DATABASE_PASSWORD', 'strapi'),
-          // SSL configuration - required for Render
-          ssl: env.bool('DATABASE_SSL', env('RENDER') ? true : false) && {
-            rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', env('RENDER') ? false : true),
-            require: true,
-          },
-        }),
-        schema: env('DATABASE_SCHEMA', 'public'),
-      },
+          
+          return config;
+        }
+      })(),
       pool: { 
         min: env.int('DATABASE_POOL_MIN', 2), 
         max: env.int('DATABASE_POOL_MAX', 10),
