@@ -38,6 +38,11 @@ module.exports = ({ env }) => {
         // SSL configuration - required for Render
         ssl: env.bool('DATABASE_SSL', env('RENDER') ? true : false) && {
           rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', env('RENDER') ? false : true),
+          // Additional SSL options for Render compatibility
+          ...(env('RENDER') && {
+            require: true,
+            sslmode: 'require'
+          })
         },
         schema: env('DATABASE_SCHEMA', 'public'),
       },
