@@ -3,7 +3,8 @@ services:
     name: manju-delight-strapi
     env: node
     buildCommand: npm install
-    startCommand: npm run start
+    startCommand: npm run render-start
+    plan: starter
     envVars:
       - key: NODE_ENV
         value: production
@@ -33,6 +34,10 @@ services:
         generateValue: true
       - key: WEBHOOKS_POPULATE_RELATIONS
         value: false
+      - key: HOST
+        value: 0.0.0.0
+      - key: RENDER
+        value: true
     healthCheckPath: /_health
 
 databases:

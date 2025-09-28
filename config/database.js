@@ -3,6 +3,15 @@ const path = require('path');
 module.exports = ({ env }) => {
   // Use postgres by default on Render, sqlite for local development
   const client = env('DATABASE_CLIENT', env('RENDER') ? 'postgres' : 'sqlite');
+  
+  // Debug logging
+  console.log(`🔧 Database configuration:`);
+  console.log(`   Client: ${client}`);
+  console.log(`   RENDER env: ${env('RENDER')}`);
+  console.log(`   DATABASE_URL exists: ${!!env('DATABASE_URL')}`);
+  if (env('DATABASE_URL')) {
+    console.log(`   DATABASE_URL: ${env('DATABASE_URL').substring(0, 20)}...`);
+  }
 
   const connections = {
     mysql: {
@@ -26,7 +35,14 @@ module.exports = ({ env }) => {
     postgres: {
       connection: {
         // Use connectionString if available (Render provides this)
-        ...(env('DATABASE_URL') && { connectionString: env('DATABASE_URL') }),
+        ...(env('DATABASE_URL') && { 
+          connectionString: env('DATABASE_URL'),
+          // Parse the connection string for additional options
+          ssl: {
+            rejectUnauthorized: false,
+            require: true,
+          }
+        }),
         // Fallback to individual connection parameters
         ...(env('DATABASE_URL') ? {} : {
           host: env('DATABASE_HOST', 'localhost'),
@@ -34,16 +50,12 @@ module.exports = ({ env }) => {
           database: env('DATABASE_NAME', 'strapi'),
           user: env('DATABASE_USERNAME', 'strapi'),
           password: env('DATABASE_PASSWORD', 'strapi'),
-        }),
-        // SSL configuration - required for Render
-        ssl: env.bool('DATABASE_SSL', env('RENDER') ? true : false) && {
-          rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', env('RENDER') ? false : true),
-          // Additional SSL options for Render compatibility
-          ...(env('RENDER') && {
+          // SSL configuration - required for Render
+          ssl: env.bool('DATABASE_SSL', env('RENDER') ? true : false) && {
+            rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', env('RENDER') ? false : true),
             require: true,
-            sslmode: 'require'
-          })
-        },
+          },
+        }),
         schema: env('DATABASE_SCHEMA', 'public'),
       },
       pool: { 
